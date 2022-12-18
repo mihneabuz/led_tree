@@ -1,5 +1,5 @@
 [package]
-name = "led_tree"
+name = "led-tree-rs"
 version = "0.1.0"
 edition = "2021"
 repository = "https://github.com/mihneabuz/led_tree.git"
