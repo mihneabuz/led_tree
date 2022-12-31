@@ -1,3 +1,6 @@
+[workspace]
+cargo-features = ["edition2021"]
+
 [package]
 name = "led-tree-rs"
 version = "0.1.0"
