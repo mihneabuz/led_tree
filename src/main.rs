@@ -1,3 +1,5 @@
+extern crate colored;
+
 use colored::Colorize;
 
 const TREE: &str = "\
