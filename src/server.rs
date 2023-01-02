@@ -133,9 +133,9 @@ pub fn start(port: &str, groups: Vec<Vec<u8>>) -> io::Result<()> {
 
 fn valid_group(s: &str, ng: usize) -> bool {
     let group = s.parse::<usize>();
-    group.is_ok() && group.unwrap() < ng
+    group.is_ok() && group.map(|g| g != 0 && g <= ng).unwrap()
 }
 
 fn parse_group(s: &str) -> usize {
-    s.parse::<usize>().unwrap()
+    s.parse::<usize>().unwrap() - 1
 }
