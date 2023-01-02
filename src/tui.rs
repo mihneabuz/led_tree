@@ -5,7 +5,6 @@ use std::process;
 use crate::tree;
 
 use serde::Deserialize;
-use sysinfo::{Pid, PidExt, ProcessExt, System, SystemExt};
 
 #[derive(Deserialize)]
 struct ReqBody {
@@ -14,11 +13,7 @@ struct ReqBody {
 }
 
 pub fn start(ng: usize) -> io::Result<()> {
-    for process in System::new_all().processes_by_name("christmas-tree") {
-        if process.pid() != Pid::from(process::id() as usize) {
-            return tui(process.pid().as_u32(), ng);
-        }
-    }
+    return tui(1000, ng);
 
     Err(io::Error::new(
         io::ErrorKind::Other,
