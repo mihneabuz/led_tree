@@ -22,13 +22,7 @@ pub fn start(ng: usize) -> io::Result<()> {
 }
 
 fn fetch_group(g: usize) -> Vec<u8> {
-    let resp =
-        reqwest::blocking::get(format!("http://localhost/api/groups/{}/leds", g))
-            .unwrap()
-            .text()
-            .unwrap();
-
-    serde_json::from_str::<ReqBody>(&resp).unwrap().LC
+    vec![]
 }
 
 fn tui(server_pid: u32, ng: usize) -> io::Result<()> {
