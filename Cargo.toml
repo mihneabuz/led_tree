@@ -4,6 +4,7 @@ version = "0.1.0"
 repository = "https://github.com/mihneabuz/led_tree.git"
 
 [dependencies]
+colored = "2.0.0"
 
 [[bin]]
 name = "christmas-tree"
