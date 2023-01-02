@@ -24,7 +24,7 @@ pub fn start(port: &str, groups: &mut Vec<Vec<u8>>) -> io::Result<()> {
             tiny_http::Method::Get => {
                 let path = request.url().split("/").skip(1).collect::<Vec<_>>();
 
-                if path[0] == "api" && path[1] == "groups" {
+                if path[0] == "api" && (path[1] == "groups" || path[1] == "group") {
                     if path.len() >= 4 && path[3] == "leds" {
                         let group = path[2].parse::<usize>();
                         if group.is_err() || group.clone().unwrap() >= ng {
@@ -46,7 +46,7 @@ pub fn start(port: &str, groups: &mut Vec<Vec<u8>>) -> io::Result<()> {
             tiny_http::Method::Post => {
                 let path = request.url().split("/").skip(1).collect::<Vec<_>>();
 
-                if path[0] == "api" && path[1] == "groups" {
+                if path[0] == "api" && path[1] == "group" {
                     if path.len() >= 4 && path[3] == "static" {
                         let group = path[2].parse::<usize>();
                         if group.is_err() || group.clone().unwrap() >= ng {

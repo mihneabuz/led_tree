@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{self, BufReader, BufRead};
+use std::io::{self, BufRead, BufReader};
 use std::process;
 use std::thread::sleep;
 use std::time::Duration;
@@ -22,14 +22,12 @@ fn get_pid() -> io::Result<u32> {
     ))
 }
 
-pub fn handle_update(msg: &str, groups: &mut Vec<Vec<u8>>) -> bool {
-    if !msg.starts_with("update") {
-        return false
+pub fn handle_update(msg: &str, groups: &mut Vec<Vec<u8>>) {
+    if msg.starts_with("update") {
+        let splits = msg.trim().split(" ").collect::<Vec<_>>();
+        let (i, group) = (splits[1], splits[2]);
+        groups[i.parse::<usize>().unwrap()] = serde_json::from_str::<Vec<u8>>(group).unwrap();
     }
-
-    let (i, group) = msg.trim().split_once(" ").unwrap().1.split_once(" ").unwrap();
-    groups[i.parse::<usize>().unwrap()] = serde_json::from_str::<Vec<u8>>(group).unwrap();
-    true
 }
 
 pub fn start(ng: usize) -> io::Result<()> {
@@ -51,12 +49,10 @@ pub fn start(ng: usize) -> io::Result<()> {
 
     while let Ok(l) = reader.read_line(&mut buf) {
         if l != 0 {
-            if handle_update(&buf, &mut groups) {
-                tree::show(&groups);
-            }
-
+            handle_update(&buf, &mut groups);
             buf.clear();
         } else {
+            tree::show(&groups);
             sleep(Duration::from_millis(100));
         }
     }
