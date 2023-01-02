@@ -105,6 +105,8 @@ pub fn start(port: &str, groups: Vec<Vec<u8>>) -> io::Result<()> {
                                 request.respond(Response::from_string("ok"))?;
                                 log_update(g, &groups[g].leds());
                             }
+                        } else {
+                            request.respond(Response::from_string("bad request"))?;
                         }
                     } else if path[3] == "animate" {
                         if let Ok(body) = from_reader::<_, AnimateReqBody>(request.as_reader()) {
@@ -115,6 +117,8 @@ pub fn start(port: &str, groups: Vec<Vec<u8>>) -> io::Result<()> {
                                 request.respond(Response::from_string("ok"))?;
                                 log_update(g, &groups[g].leds());
                             }
+                        } else {
+                            request.respond(Response::from_string("bad request"))?;
                         }
                     }
                 } else {
