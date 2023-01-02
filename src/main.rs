@@ -1,3 +1,7 @@
+extern crate colored;
+extern crate serde;
+extern crate serde_json;
+
 use std::{env, io};
 
 fn main() -> io::Result<()> {
