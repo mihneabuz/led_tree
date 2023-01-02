@@ -13,6 +13,10 @@ struct ReqBody {
 pub fn start(port: &str, groups: &mut Vec<Vec<u8>>) -> io::Result<()> {
     let ng = groups.len();
 
+    for (i, group) in groups.iter().enumerate() {
+        println!("update {} {:?}", i, group);
+    }
+
     let server = Server::http("0.0.0.0:".to_owned() + port).unwrap();
 
     for mut request in server.incoming_requests() {
@@ -57,7 +61,7 @@ pub fn start(port: &str, groups: &mut Vec<Vec<u8>>) -> io::Result<()> {
                                         groups[g][i] = body.SC[i];
                                     }
                                     request.respond(Response::from_string("ok"))?;
-                                    println!("update {}", g);
+                                    println!("update {} {:?}", g, &groups[g]);
                                 }
                             } else {
                                 request.respond(Response::from_string("bad request"))?;

@@ -79,8 +79,6 @@ pub fn parse_groups() -> Vec<Vec<u8>> {
         groups.pop();
     }
 
-    println!("{:?}", groups);
-
     groups
 }
 
@@ -91,7 +89,7 @@ pub fn clear() {
 pub fn show(groups: &Vec<Vec<u8>>) {
     clear();
 
-    let mut color = groups.iter().flatten();
+    let mut color = groups.iter().flatten().chain(iter::repeat(&0));
 
     for c in TREE.chars() {
         if c == '\n' {

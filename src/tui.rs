@@ -1,19 +1,18 @@
 use std::fs::File;
-use std::io::{self, BufReader, BufRead, Seek};
+use std::io::{self, BufReader, BufRead};
 use std::process;
 
 use crate::tree;
 
-use serde::Deserialize;
-
-#[derive(Deserialize)]
-struct ReqBody {
-    LC: Vec<u8>,
-    NL: usize,
-}
-
-pub fn start(ng: usize) -> io::Result<()> {
-    return tui(1000, ng);
+fn get_pid() -> io::Result<u32> {
+    let cmd = process::Command::new("pidof").arg("christmas-tree").output()?;
+    for s in String::from_utf8(cmd.stdout).unwrap().trim().split(" ") {
+        if let Ok(pid) = s.parse::<u32>() {
+            if pid != process::id() {
+                return Ok(pid);
+            }
+        }
+    }
 
     Err(io::Error::new(
         io::ErrorKind::Other,
@@ -21,30 +20,36 @@ pub fn start(ng: usize) -> io::Result<()> {
     ))
 }
 
-fn fetch_group(g: usize) -> Vec<u8> {
-    vec![]
+pub fn handle_update(msg: &str, groups: &mut Vec<Vec<u8>>) -> bool {
+    if !msg.starts_with("update") {
+        return false
+    }
+
+    let (i, group) = msg.trim().split_once(" ").unwrap().1.split_once(" ").unwrap();
+    groups[i.parse::<usize>().unwrap()] = serde_json::from_str::<Vec<u8>>(group).unwrap();
+    true
 }
 
-fn tui(server_pid: u32, ng: usize) -> io::Result<()> {
-    let server_out = File::open(format!("/proc/{}/fd/1", server_pid)).unwrap();
+pub fn start(ng: usize) -> io::Result<()> {
+    let server_out = File::open(format!("/proc/{}/fd/1", get_pid()?))?;
     let mut reader = BufReader::new(server_out);
 
-    reader.seek(io::SeekFrom::End(0))?;
+    let mut groups = vec![Vec::new(); ng];
+    let mut buf = String::new();
+    while let Ok(l) = reader.read_line(&mut buf) {
+        if l == 0 {
+            break;
+        }
 
-    let mut groups = (0..ng)
-        .into_iter()
-        .map(|g| fetch_group(g))
-        .collect::<Vec<_>>();
+        handle_update(&buf, &mut groups);
+        buf.clear();
+    }
 
     tree::show(&groups);
 
-    let mut buf = String::new();
     while let Ok(l) = reader.read_line(&mut buf) {
         if l != 0 {
-            if buf.starts_with("update") {
-                let g = buf.trim().split_once(" ").unwrap().1.parse::<usize>().unwrap();
-                groups[g] = fetch_group(g);
-
+            if handle_update(&buf, &mut groups) {
                 tree::show(&groups);
             }
 
