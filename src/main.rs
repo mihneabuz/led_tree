@@ -2,6 +2,7 @@ extern crate colored;
 extern crate serde;
 extern crate serde_json;
 extern crate tiny_http;
+extern crate reqwest;
 
 use std::{env, io};
 
