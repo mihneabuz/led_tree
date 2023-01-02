@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{self, BufReader, BufRead, Seek};
 use std::process;
 
-use tree;
+use crate::tree;
 
 use serde::Deserialize;
 use sysinfo::{Pid, PidExt, ProcessExt, System, SystemExt};
