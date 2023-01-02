@@ -1,7 +1,7 @@
 extern crate colored;
 extern crate serde;
 extern crate serde_json;
-extern crate sysinfo;
+extern crate tiny_http;
 
 use std::{env, io};
 
