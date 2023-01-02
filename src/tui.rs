@@ -22,11 +22,14 @@ fn get_pid() -> io::Result<u32> {
     ))
 }
 
-pub fn handle_update(msg: &str, groups: &mut Vec<Vec<u8>>) {
+pub fn handle_update(msg: &str, groups: &mut Vec<Vec<u8>>) -> bool {
     if msg.starts_with("update") {
-        let splits = msg.trim().split(" ").collect::<Vec<_>>();
-        let (i, group) = (splits[1], splits[2]);
-        groups[i.parse::<usize>().unwrap()] = serde_json::from_str::<Vec<u8>>(group).unwrap();
+        let (i, g) = msg[7..].split_once(" ").unwrap();
+        groups[i.parse::<usize>().unwrap()] = serde_json::from_str::<Vec<u8>>(g).unwrap();
+
+        true
+    } else {
+        false
     }
 }
 
@@ -47,12 +50,20 @@ pub fn start(ng: usize) -> io::Result<()> {
 
     tree::show(&groups);
 
+    let mut update = false;
     while let Ok(l) = reader.read_line(&mut buf) {
         if l != 0 {
-            handle_update(&buf, &mut groups);
+            if handle_update(&buf, &mut groups) {
+                update = true;
+            }
+
             buf.clear();
         } else {
-            tree::show(&groups);
+            if update {
+                tree::show(&groups);
+                update = false;
+            }
+
             sleep(Duration::from_millis(100));
         }
     }

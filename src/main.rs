@@ -10,12 +10,12 @@ mod tui;
 use std::{env, io};
 
 fn main() -> io::Result<()> {
-    let mut groups = tree::parse_groups();
+    let groups = tree::parse_groups();
 
     let args: Vec<String> = env::args().collect();
     if args.len() > 1 && args[1] == "server" {
         let port = &args[2];
-        server::start(port, &mut groups)?;
+        server::start(port, groups)?;
     } else {
         tui::start(groups.len())?;
     }
