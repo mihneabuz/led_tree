@@ -1,6 +1,8 @@
 use std::fs::File;
 use std::io::{self, BufReader, BufRead};
 use std::process;
+use std::thread::sleep;
+use std::time::Duration;
 
 use crate::tree;
 
@@ -54,6 +56,8 @@ pub fn start(ng: usize) -> io::Result<()> {
             }
 
             buf.clear();
+        } else {
+            sleep(Duration::from_millis(100));
         }
     }
 
