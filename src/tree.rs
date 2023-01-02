@@ -46,8 +46,8 @@ enum Type {
 
 fn char_type(c: char) -> Type {
     match c {
-        '|' | '-' | ' ' => Type::Frame,
-        '~' | '#' => Type::Tree,
+        '|' | '-' => Type::Frame,
+        '~' | '#' | ' ' => Type::Tree,
         '>' | '<' => Type::Decoration,
         'O' => Type::Led,
         _ => unreachable!(),
@@ -91,16 +91,27 @@ pub fn show(groups: &Vec<Vec<u8>>) {
 
     let mut color = groups.iter().flatten().chain(iter::repeat(&0));
 
+    let mut buf = String::new();
     for c in TREE.chars() {
         if c == '\n' {
             println!();
         } else {
+            let ctype = char_type(c);
+
+            if ctype == Type::Tree {
+                buf.push(c);
+                continue;
+            } else {
+                print!("{}", format!("{}", buf).bright_green());
+                buf.clear();
+            }
+
             let fmt = format!("{}", c);
             print!(
                 "{}",
                 match char_type(c) {
                     Type::Frame => fmt.bold(),
-                    Type::Tree => fmt.green(),
+                    Type::Tree => fmt.bright_green(),
                     Type::Decoration => fmt.red(),
                     Type::Led => {
                         match color.next() {
