@@ -67,6 +67,7 @@ impl CursesUI {
         ncurses::noecho();
 
         ncurses::start_color();
+        ncurses::use_default_colors();
 
         let bg = ncurses::COLOR_BLACK;
 
