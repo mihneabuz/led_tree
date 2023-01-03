@@ -4,7 +4,7 @@ use std::process;
 use std::thread::sleep;
 use std::time::Duration;
 
-use crate::tree;
+use crate::tree::{CursesUI, UI};
 
 fn get_pid() -> io::Result<u32> {
     let cmd = process::Command::new("pidof").arg("christmas-tree").output()?;
@@ -48,7 +48,8 @@ pub fn start(ng: usize) -> io::Result<()> {
         buf.clear();
     }
 
-    tree::show(&groups);
+    let mut tree = CursesUI::new();
+    tree.show(&groups);
 
     let mut update = false;
     while let Ok(l) = reader.read_line(&mut buf) {
@@ -60,7 +61,7 @@ pub fn start(ng: usize) -> io::Result<()> {
             buf.clear();
         } else {
             if update {
-                tree::show(&groups);
+                tree.show(&groups);
                 update = false;
             }
 

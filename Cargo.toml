@@ -5,6 +5,7 @@ repository = "https://github.com/mihneabuz/led_tree.git"
 
 [dependencies]
 colored = "2.0.0"
+ncurses = "5.101.0"
 serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.91"
 tiny_http = "0.12.0"
