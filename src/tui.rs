@@ -4,7 +4,7 @@ use std::process;
 use std::thread::sleep;
 use std::time::Duration;
 
-use crate::tree::{CursesUI, UI};
+use crate::tree;
 
 fn get_pid() -> io::Result<u32> {
     let cmd = process::Command::new("pidof").arg("christmas-tree").output()?;
@@ -48,7 +48,7 @@ pub fn start(ng: usize) -> io::Result<()> {
         buf.clear();
     }
 
-    let mut tree = CursesUI::new();
+    let mut tree = tree::create_ui();
     tree.show(&groups);
 
     let mut update = false;

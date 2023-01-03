@@ -38,11 +38,26 @@ pub const TREE: &str = "\
 |---------------------------------------------------|\n\
 ";
 
+pub fn create_ui<'a>() -> Box<dyn UI> {
+    if ncurses_colors() {
+        Box::new(CursesUI::new())
+    } else {
+        Box::new(SimpleUI::new())
+    }
+}
+
+fn ncurses_colors() -> bool {
+    ncurses::initscr();
+    let colors = ncurses::has_colors();
+    ncurses::endwin();
+    colors
+}
+
 pub trait UI {
     fn show(&mut self, groups: &Vec<Vec<u8>>);
 }
 
-pub struct CursesUI {
+struct CursesUI {
     offset: (i32, i32),
     colors: Vec<i16>,
 }
@@ -61,7 +76,7 @@ impl CursesUI {
     const COLOR_PAIR_CYAN: i16 = 10;
     const COLOR_PAIR_WHITE: i16 = 11;
 
-    pub fn new() -> Self {
+    fn new() -> Self {
         ncurses::initscr();
         ncurses::keypad(ncurses::stdscr(), true);
         ncurses::noecho();
@@ -110,8 +125,9 @@ impl UI for CursesUI {
         let mut color = groups
             .iter()
             .flatten()
-            .chain(std::iter::repeat(&0))
-            .map(|c| self.colors[*c as usize]);
+            .copied()
+            .chain(std::iter::repeat(0))
+            .map(|c| self.colors[c as usize]);
 
         ncurses::mv(self.offset.0, self.offset.1);
 
@@ -148,11 +164,34 @@ impl Drop for CursesUI {
     }
 }
 
-pub struct SimpleUI {}
+struct SimpleUI {}
 
 impl SimpleUI {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Self {}
+    }
+
+    fn color_char(c: char, colors: &mut impl Iterator<Item = u8>) -> colored::ColoredString {
+        let fmt = format!("{}", c);
+        match c {
+            '|' | '-' | ' ' => fmt.bold(),
+            '~' | '#' => fmt.green(),
+            '>' | '<' => fmt.red(),
+            LED => {
+                match colors.next() {
+                    Some(0) => fmt.black(),
+                    Some(1) => fmt.red(),
+                    Some(2) => fmt.green(),
+                    Some(3) => fmt.yellow(),
+                    Some(4) => fmt.blue(),
+                    Some(5) => fmt.magenta(),
+                    Some(6) => fmt.cyan(),
+                    Some(7) => fmt.white(),
+                    _ => unreachable!(),
+                }
+            }
+            _ => unreachable!(),
+        }
     }
 }
 
@@ -160,7 +199,7 @@ impl UI for SimpleUI {
     fn show(&mut self, groups: &Vec<Vec<u8>>) {
         print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
 
-        let mut color = groups.iter().flatten().chain(std::iter::repeat(&0));
+        let mut color = groups.iter().flatten().copied().chain(std::iter::repeat(0));
 
         let mut buf = String::new();
         for c in TREE.chars() {
@@ -175,28 +214,7 @@ impl UI for SimpleUI {
                     buf.clear();
                 }
 
-                let fmt = format!("{}", c);
-                print!(
-                    "{}",
-                    match c {
-                        '|' | '-' => fmt.bold(),
-                        '>' | '<' => fmt.red(),
-                        LED => {
-                            match color.next() {
-                                Some(0) => fmt.black(),
-                                Some(1) => fmt.red(),
-                                Some(2) => fmt.green(),
-                                Some(3) => fmt.yellow(),
-                                Some(4) => fmt.blue(),
-                                Some(5) => fmt.magenta(),
-                                Some(6) => fmt.cyan(),
-                                Some(7) => fmt.white(),
-                                _ => unreachable!(),
-                            }
-                        }
-                        _ => unreachable!(),
-                    }
-                );
+                print!("{}", Self::color_char(c, &mut color));
             }
         }
     }
